@@ -84,8 +84,8 @@ void Map::draw(WINDOW* win) {
 void Map::makeGate() {
     //immune wall 제외한 곳에 gate를 하나만 생성
     int y, x;
-    x = rand() % (width-2) + 1;
-    y = rand() % (height-2) + 1;
+    x = rand() % (width-1) ;
+    y = rand() % (height-1) ;
 
     if(map[y][x] == 0 || map[y][x] == 1) {
         map[y][x] = 3;

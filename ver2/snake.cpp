@@ -55,9 +55,12 @@ void Snake::grow() {
 
 void Snake::degrow() {
     body.pop_back();
+    if(body.size() < 3) {
+        isDead = true;
+    }
 }
 
-void Snake::interact(int y, int x, int point, Map map) {
+void Snake::interact(int y, int x, int point, Map& map, Score& score) {
     if (body.front().first == y && body.front().second == x) {
         switch (point) {
                 case 0:
@@ -70,16 +73,19 @@ void Snake::interact(int y, int x, int point, Map map) {
                     break;
                 case 3: // Gate
                     gate(y, x, map);
+                    score.setCurrentGate(score.getCurrentGate() + 1);
                     break;
                 case 4:
                     grow();
                     map.setObject(y, x, 0);
                     map.makeItem();
+                    score.setCurrentGrowth(score.getCurrentGrowth() + 1);
                     break;
                 case 5:
                     degrow();
                     map.setObject(y, x, 0);
                     map.makePoison();
+                    score.setCurrentPoison(score.getCurrentPoison() + 1);
                     break;
             }
     }
@@ -90,12 +96,13 @@ void Snake::gate(int y, int x, Map map) {
     int another_y, another_x;
     for (int i = 0; i < map.getHeight(); i++) {
         for (int j = 0; j < map.getWidth(); j++) {
-            if (map.getObject(i, j) == 3 && i != y && j != x) {
+            if (map.getObject(i, j) == 3 && (i != y || j != x)) {
                 another_y = i;
                 another_x = j;
             }
         }
     }
+    body.pop_front();
     // if out gate is on edge, snake's dir is wall's opposite dir
     if (another_y == 0) {
         dir = DOWN;
@@ -108,41 +115,49 @@ void Snake::gate(int y, int x, Map map) {
     } else { // if out gate is not on edge, snake's dir follows 
              //original dir, clockwise dir, counter-clockwise dir, opposite dir
         if (dir == UP) {
-            if (map.getObject(another_y-1, another_x) == 1) {
-                dir = RIGHT;
-            } else if (map.getObject(another_y, another_x+1) == 1) {
-                dir = LEFT;
-            } else {
-                dir = DOWN;
-            }
-        } else if (dir == RIGHT) {
-            if (map.getObject(another_y, another_x+1) == 1) {
-                dir = DOWN;
-            } else if (map.getObject(another_y+1, another_x) == 1) {
+            if (map.getObject(another_y-1, another_x) != 1) {
                 dir = UP;
-            } else {
+            } else if (map.getObject(another_y, another_x+1) != 1) {
+                dir = RIGHT;
+            } else if (map.getObject(another_y, another_x-1) != 1) {
                 dir = LEFT;
+            } else {
+                dir = DOWN;
             }
         } else if (dir == DOWN) {
-            if (map.getObject(another_y+1, another_x) == 1) {
-                dir = LEFT;
-            } else if (map.getObject(another_y, another_x-1) == 1) {
+            if (map.getObject(another_y+1, another_x) != 1) {
+                dir = DOWN;
+            } else if (map.getObject(another_y, another_x+1) != 1) {
                 dir = RIGHT;
+            } else if (map.getObject(another_y, another_x-1) != 1) {
+                dir = LEFT;
             } else {
                 dir = UP;
             }
         } else if (dir == LEFT) {
-            if (map.getObject(another_y, another_x-1) == 1) {
+            if (map.getObject(another_y, another_x-1) != 1) {
+                dir = LEFT;
+            } else if (map.getObject(another_y-1, another_x) != 1) {
                 dir = UP;
-            } else if (map.getObject(another_y-1, another_x) == 1) {
+            } else if (map.getObject(another_y+1, another_x) != 1) {
                 dir = DOWN;
             } else {
                 dir = RIGHT;
             }
-        }
+        } else if (dir == RIGHT) {
+            if (map.getObject(another_y, another_x+1) != 1) {
+                dir = RIGHT;
+            } else if (map.getObject(another_y-1, another_x) != 1) {
+                dir = UP;
+            } else if (map.getObject(another_y+1, another_x) != 1) {
+                dir = DOWN;
+            } else {
+                dir = LEFT;
+            }
+        } 
     }
 
-    // move snake to out gate, 다음걸 체크하고 움직이기 전에 수행해야함!
+    // move snake to out gate
     if(dir == UP) {
         body.push_front(make_pair(another_y-1, another_x));
     } else if (dir == DOWN) {
@@ -164,4 +179,8 @@ int Snake::getsize() {
 
 pair<int, int> Snake::getHead() {
     return body.front();
+}
+
+Direction Snake::getDir(){
+    return dir;
 }

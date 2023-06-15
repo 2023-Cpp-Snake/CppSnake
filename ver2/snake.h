@@ -1,5 +1,6 @@
 #include <deque>
 #include <ncurses.h>
+#include "score.h"
 #include "map.h"
 #include "direction.h"
 
@@ -15,6 +16,7 @@ public:
     Snake(int height, int width, Direction dir);
 
     void setDir(Direction dir);
+    Direction getDir();
     int getsize();
     bool getIsDead();
     pair<int, int> getHead();
@@ -24,7 +26,7 @@ public:
     void grow();
     void degrow();
 
-    void interact(int y, int x, int point, Map map);
+    void interact(int y, int x, int point, Map& map, Score& score);
 
     void draw(WINDOW* win);
 
