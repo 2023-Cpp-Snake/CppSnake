@@ -3,6 +3,7 @@
 #include <utility> // pair
 #include <unistd.h> // usleep
 #include <cstdlib> // rand
+#include <ctime> // time
 
 using namespace std;
 
@@ -99,6 +100,25 @@ public:
             return LEFT;
     }
 
+    void reset(WINDOW* game_win) {
+        int dir = rand()%4;
+        if (dir == 0) {
+            x = 0;
+            y = 1 + rand() % (width-2);
+        } else if (dir == 1) {
+            x = height-1;
+            y = 1 + rand() % (width-2);
+        } else if (dir == 2) {
+            x = 1 + rand() % (height-2);
+            y = 0;
+        } else {
+            x = 1 + rand() % (height-2);
+            y = width-1;
+        }
+
+        draw(game_win);
+    }
+
     //getter, setter
     int getX() const {
         return x;
@@ -128,11 +148,26 @@ public:
     Item(int x, int y) : x(x), y(y) {}
 
     void draw(WINDOW* game_win) const {
-        mvwprintw(game_win, y, x, "X");
+        mvwprintw(game_win, x, y, "X");
     }
 
     bool isCollision(int x, int y) const {
         return this->x == x && this->y == y;
+    }
+
+    void reset(int wall_width, int wall_height, deque < pair<int, int> > snake, WINDOW* game_win) {
+        x = 1 + rand() % (wall_width-2);
+        y = 1 + rand() % (wall_height-2);
+        // 뱀의 머리 혹은 몸통과 충돌하면 다시 생성
+        for(auto p : snake) {
+            if (isCollision(p.first, p.second)) {
+                reset(wall_width, wall_height, snake, game_win);
+                break;
+            } else {
+                draw(game_win);
+            }
+        }
+        
     }
 
     //getter, setter
@@ -158,39 +193,124 @@ public:
     PoisonItem(int x, int y) : Item(x, y) {}
 
     void draw(WINDOW* game_win) const {
-        mvwprintw(game_win, y, x, "P");
+        mvwprintw(game_win, x, y, "P");
+    }
+};
+
+// 점수를 나타내는 클래스
+class Score {
+private:
+    int score;
+    int level;
+    int speed;
+
+public:
+    Score() : score(0), level(1), speed(1000) {}
+
+    void draw(WINDOW* score_win) const {
+        mvwprintw(score_win, 1, 1, "Score: %d", score);
+        mvwprintw(score_win, 2, 1, "Level: %d", level);
     }
 
-    void reset(int wall_width, int wall_height, deque < pair<int, int> > snake, WINDOW* game_win) {
-        x = 1 + rand() % (wall_width-2);
-        y = 1 + rand() % (wall_height-2);
-        if (isCollision(snake.front().first, snake.front().second))
-            reset(wall_width, wall_height, snake, game_win);
-        else
-            draw(game_win);
+    void addScore(int score) {
+        this->score += score;
+    }
+
+    void addLevel() {
+        level++;
+    }
+
+    void addSpeed() {
+        if(speed > 100) speed -= 100;
+    }
+
+    //getter, setter
+    int getScore() const {
+        return score;
+    }
+
+    int getLevel() const {
+        return level;
+    }
+
+    int getSpeed() const {
+        return speed;
+    }
+
+    void setScore(int score) {
+        this->score = score;
+    }
+
+    void setLevel(int level) {
+        this->level = level;
+    }
+
+    void setSpeed(int speed) {
+        this->speed = speed;
+    }
+};
+
+class TitleScreen {
+private:
+    int width;
+    int height;
+public:
+    TitleScreen(int width, int height) : width(width), height(height) {}
+
+    void draw(WINDOW* win) const {
+        wclear(win);
+        box(win, 0, 0);
+        mvwprintw(win, height/2, (width/2)-5, "SNAKE GAME");
+        mvwprintw(win, height/2+1, (width/2)-6, "PRESS ANY KEY");
+        wrefresh(win);
+    }
+};
+
+class GameOverScreen {
+private:
+    int width;
+    int height;
+public:
+    GameOverScreen(int width, int height) : width(width), height(height) {}
+
+    void draw(WINDOW* win) const {
+        wclear(win);
+        box(win, 0, 0);
+        mvwprintw(win, height/2, (width/2)-5, "GAME OVER");
+        mvwprintw(win, height/2+1, (width/2)-5, "PRESS ANY KEY");
+        mvwprintw(win, height/2+1, (width/2)-5, "TO SHUTDOWN");
+        wrefresh(win);
     }
 };
 
 // 게임 실행
 int main() {
-    initscr();
-    clear();
-    wrefresh(stdscr);
-
-    int wall_width = 21;
-    int wall_height = 21;
-    WINDOW* game_win = newwin(wall_height, wall_width, 0, 0);
-
-    timeout(1000); // 사용자의 입력을 기다리는 시간을 1000ms로 설정
-    nodelay(game_win, TRUE);
-
-    box(game_win, 0, 0); // 게임 화면을 테두리로 감싸줌
     srand(time(0)); // 난수 생성기 초기화
-    noecho(); // 사용자의 입력을 화면에 표시하지 않음
+    Score score; // 점수
+    initscr();
+    refresh();
+
+    int wall_width = 23;
+    int wall_height = 23;
+
+    WINDOW* score_win = newwin(4, wall_width, wall_height, 0);
+    WINDOW* game_win = newwin(wall_height, wall_width, 0, 0);
     keypad(game_win, TRUE); // 특수 키를 사용 가능하게 함
+    noecho(); // 사용자의 입력을 화면에 표시하지 않음
     curs_set(0); // 커서를 보이지 않게 함
-    
-    
+
+
+    TitleScreen title(wall_width, wall_height);
+    GameOverScreen gameover(wall_width, wall_height);
+
+    title.draw(game_win);
+    wrefresh(game_win);
+    getch();
+
+    nodelay(game_win, TRUE); // 사용자의 입력을 기다리지 않음
+    wtimeout(game_win, score.getSpeed()); // 사용자의 입력을 기다리는 시간을 1000ms로 설정
+    box(game_win, 0, 0); // 게임 화면을 테두리로 감싸줌
+    box(score_win, 0, 0); // 점수 화면을 테두리로 감싸줌
 
 
     deque< pair<int, int> > snake; // 뱀을 나타내는 데크
@@ -226,10 +346,15 @@ int main() {
     while (true) {
         wclear(game_win); // 게임 창을 지움
         box(game_win, 0, 0); // 창에 테두리를 그림
+        box(score_win, 0, 0); // 점수 화면을 테두리로 감싸줌
+        score.draw(score_win); // 점수를 화면에 그림
+        wrefresh(score_win); // 점수 창을 화면에 그림
+        wrefresh(game_win); // 게임 창을 화면에 그림
         //wall.draw(game_win); // 벽을 화면에 그림
         iWall.draw(game_win); // 게이트가 생성되지 않는 벽을 화면에 그림
         gate1.draw(game_win); // 게이트를 화면에 그림
         gate2.draw(game_win); // 게이트를 화면에 그림
+        
 
         // 뱀을 화면에 그림
         for (auto p : snake) { //뱀의 머리는 화살표로 표시
@@ -252,7 +377,7 @@ int main() {
         pItem.draw(game_win); // 독 아이템을 화면에 그림
 
         // 키 입력을 처리
-        int ch = getch();
+        int ch = wgetch(game_win);
 
         if (ch == KEY_UP && dir != DOWN) {
             dir = UP;
@@ -317,19 +442,45 @@ int main() {
         }
 
         if (pItem.isCollision(new_head.first, new_head.second)) { // 독 아이템과 충돌
-            break; // 프로그램 종료
+            //꼬리를 1칸 제거
+            snake.pop_front();
+            //독 아이템을 새로 생성
+            pItem.reset(wall_width, wall_height, snake, game_win);
+            //snake의 길이가 3 미만이라면, 게임 끝
+            if(snake.size() <= 3) {
+                break;
+            }
         }
 
         if (item.isCollision(new_head.first, new_head.second)) { // 아이템과 충돌
-            item = Item(1 + rand() % (wall_width-2), 1 + rand() % (wall_height-2)); // 새로운 아이템 생성
+            score.setScore(score.getScore() + 10); // 점수를 10 증가
+            item.reset(wall_width, wall_height, snake, game_win); // 아이템을 새로 생성
             pItem.reset(wall_width, wall_height, snake, game_win); // 독 아이템을 새로 생성
+            gate1.reset(game_win); // 게이트를 새로 생성
+            gate2.reset(game_win); // 게이트를 새로 생성
+
         } else {
             snake.pop_front(); // 꼬리를 제거
         }
         
+        // 스코어가 50점이 넘을 때 마다, 레벨 증가
+        if (score.getScore() / score.getLevel() >= 50) {
+            score.addLevel();
+            score.addSpeed();
+            wtimeout(game_win, score.getSpeed());
+        }
+
+        score.draw(score_win); // 점수를 화면에 그림
 
         wrefresh(game_win); // 게임 창을 갱신
+        wrefresh(score_win); // 점수 창을 갱신
     }
+    //게임오버 메시지를 화면에 출력
+    gameover.draw(game_win);
+    wrefresh(game_win); // 게임 창을 갱신
+    getch(); // 사용자가 키를 입력할 때까지 대기
+
+
     endwin(); // ncurses를 종료
     return 0;
 
