@@ -30,7 +30,7 @@ public:
             mvprintw(0, i, "#");
             mvprintw(height - 1, i, "#");
         }
-    }
+    }   
 
     bool isCollision(int x, int y) const {
         return x == 0 || x == height - 1 || y == 0 || y == width - 1;
@@ -39,7 +39,7 @@ public:
 
 // 아이템을 나타내는 클래스
 class Item {
-private:
+protected:
     int x;
     int y;
 
@@ -52,6 +52,32 @@ public:
 
     bool isCollision(int x, int y) const {
         return this->x == x && this->y == y;
+    }
+
+    //getter, setter
+    int getX() const {
+        return x;
+    }
+
+    int getY() const {
+        return y;
+    }
+
+    void setX(int x) {
+        this->x = x;
+    }
+
+    void setY(int y) {
+        this->y = y;
+    }
+};
+
+class PoisonItem : public Item {
+public:
+    PoisonItem(int x, int y) : Item(x, y) {}
+
+    void draw() const {
+        mvprintw(x, y, "P");
     }
 };
 
@@ -80,17 +106,39 @@ int main() {
 
     Wall wall(wall_width, wall_height) ; // 벽 생성
     Item item(1 + rand() % (wall_width-2), 1 + rand() % (wall_height-2)); // 아이템 생성
+    PoisonItem pItem(1 + rand() % (wall_width-2), 1 + rand() % (wall_height-2)); // 독 아이템 생성
+
+    //만약, 초기 뱀의 위치와 겹친다면 다시 생성
+    while (item.isCollision(snake.front().first, snake.front().second)) {
+        item = Item(1 + rand() % (wall_width-2), 1 + rand() % (wall_height-2));
+    }
+     while(item.isCollision(pItem.getX(), pItem.getY())) {
+        pItem = PoisonItem(1 + rand() % (wall_width-2), 1 + rand() % (wall_height-2));
+    }
 
     while (true) {
         clear(); // 화면을 지움
         wall.draw(); // 벽을 화면에 그림
 
         // 뱀을 화면에 그림
-        for (auto p : snake) {
-            mvprintw(p.first, p.second, "o");
+        for (auto p : snake) { //뱀의 머리는 화살표로 표시
+            if (p == snake.back()) {
+                if (dir == UP) {
+                    mvprintw(p.first, p.second, "^");
+                } else if (dir == DOWN) {
+                    mvprintw(p.first, p.second, "v");
+                } else if (dir == LEFT) {
+                    mvprintw(p.first, p.second, "<");
+                } else if (dir == RIGHT) {
+                    mvprintw(p.first, p.second, ">");
+                }
+            } else {
+                mvprintw(p.first, p.second, "o");
+            }
         }
 
         item.draw(); // 아이템을 화면에 그림
+        pItem.draw(); // 독 아이템을 화면에 그림
 
         // 키 입력을 처리
         int ch = getch();
@@ -128,6 +176,10 @@ int main() {
         snake.push_back(new_head); // 새로운 머리를 추가
 
         if (wall.isCollision(new_head.first, new_head.second)) { // 벽과 충돌
+            break; // 프로그램 종료
+        }
+
+        if (pItem.isCollision(new_head.first, new_head.second)) { // 벽과 충돌
             break; // 프로그램 종료
         }
 
