@@ -8,7 +8,7 @@ class Map {
     Wall wall;
 
     public:
-    Map(int width, int height);
+    Map(int width, int height, Snake& snake, Wall& wall);
     void draw();
     void collusion();
     void update();
