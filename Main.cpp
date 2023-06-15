@@ -65,13 +65,19 @@ int main() {
     std::deque<std::pair<int, int> > snake; // 뱀을 나타내는 데크
     Direction dir = RIGHT; // 처음에는 오른쪽으로 움직임
 
+    // 벽의 크기 설정
+    int wall_width = 21;
+    int wall_height = 21;
+
+
     // 뱀의 초기 상태 설정
     snake.push_back(std::make_pair(10, 10));
     snake.push_back(std::make_pair(10, 11));
     snake.push_back(std::make_pair(10, 12));
 
-    Wall wall(21, 21); // 벽 생성
-    Item item(5, 5); // 아이템 생성
+
+    Wall wall(wall_width, wall_height) ; // 벽 생성
+    Item item(1 + rand() % (wall_width-2), 1 + rand() % (wall_height-2)); // 아이템 생성
 
     while (true) {
         clear(); // 화면을 지움
@@ -107,19 +113,27 @@ int main() {
         } else if (dir == RIGHT) {
             new_head.second++;
         }
+
+        //몸통과 충돌
+        for (auto p : snake) {
+            if (p.first == new_head.first && p.second == new_head.second) {
+                endwin();
+                return 0;
+            }
+        }
+
         snake.push_back(new_head); // 새로운 머리를 추가
-        snake.pop_front(); // 꼬리를 제거
 
         if (wall.isCollision(new_head.first, new_head.second)) { // 벽과 충돌
             break; // 프로그램 종료
         }
 
         if (item.isCollision(new_head.first, new_head.second)) { // 아이템과 충돌
-            item = Item(rand() % 19 + 1, rand() % 19 + 1); // 새로운 아이템 생성
-            snake.push_front(new_head); // 꼬리를 제거하지 않음
+            item = Item(1 + rand() % (wall_width-2), 1 + rand() % (wall_height-2)); // 새로운 아이템 생성
         } else {
+            snake.pop_front(); // 꼬리를 제거
         }
-
+        
 
         refresh(); // 화면을 갱신
         usleep(100000); // 일시 정지 (microseconds)
