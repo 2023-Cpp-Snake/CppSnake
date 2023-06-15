@@ -2,6 +2,7 @@
 #include <deque>
 #include <utility> // pair
 #include <unistd.h> // usleep
+#include <cstdlib> // rand
 
 // 뱀의 방향을 정의
 enum Direction {
@@ -58,17 +59,18 @@ public:
 int main() {
     initscr(); // ncurses를 초기화
     noecho(); // 사용자의 입력을 화면에 표시하지 않음
-    cbreak(); // 키를 입력할 때마다 처리
     keypad(stdscr, TRUE); // 특수 키를 사용 가능하게 함
     curs_set(0); // 커서를 보이지 않게 함
+    nodelay(stdscr, TRUE);
+    timeout(1000); // 사용자의 입력을 기다리는 시간을 1000ms로 설정
 
-    std::deque<std::pair<int, int> > snake; // 뱀을 나타내는 데크
+
+    std::deque< std::pair<int, int> > snake; // 뱀을 나타내는 데크
     Direction dir = RIGHT; // 처음에는 오른쪽으로 움직임
 
     // 벽의 크기 설정
     int wall_width = 21;
     int wall_height = 21;
-
 
     // 뱀의 초기 상태 설정
     snake.push_back(std::make_pair(10, 10));
@@ -92,6 +94,7 @@ int main() {
 
         // 키 입력을 처리
         int ch = getch();
+
         if (ch == KEY_UP && dir != DOWN) {
             dir = UP;
         } else if (ch == KEY_DOWN && dir != UP) {
@@ -136,7 +139,6 @@ int main() {
         
 
         refresh(); // 화면을 갱신
-        usleep(100000); // 일시 정지 (microseconds)
     }
     endwin(); // ncurses를 종료
     return 0;
