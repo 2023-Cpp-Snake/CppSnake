@@ -1,33 +1,28 @@
 #include <ncurses.h>
+#include "Snake.h"
 #include <iostream>
 #include <string>
 #include <vector>
 using namespace std;
 
-class Snake {
-    private:
-    int x, y;
+Snake::Snake(int x, int y) {
+    this->x = x;
+    this->y = y;
+}
 
-    public:
-    Snake(int x, int y) {
-        this->x = x;
-        this->y = y;
-    }
+int Snake::getX() {
+    return x;
+}
 
-    //getters, setters
-    int getX() {
-        return x;
-    }
+int Snake::getY() {
+    return y;
+}
 
-    int getY() {
-        return y;
-    }
+void Snake::setX(int x) {
+    this->x = x;
+}
 
-    void setX(int x) {
-        this->x = x;
-    }
+void Snake::setY(int y) {
+    this->y = y;
+}
 
-    void setY(int y) {
-        this->y = y;
-    }
-};
