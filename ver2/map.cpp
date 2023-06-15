@@ -3,21 +3,17 @@
 Map::Map(int width, int height) {
     this->width = width;
     this->height = height;
-    map = new int*[height];
+    map.resize(height);
     for (int i = 0; i < height; i++) {
-        map[i] = new int[width];
-        for (int j = 0; j < width; j++) {
+        map[i].resize(width);
+    }
+    for (int i = 0; i < height; i++) {
+        for (int j=0; j < width; j++) {
             map[i][j] = 0;
         }
     }
 }
 
-Map::~Map() {
-    for (int i = 0; i < height; i++) {
-        delete[] map[i];
-    }
-    delete[] map;
-}
 
 void Map::setWall(int y, int x) {
     map[y][x] = 1;
@@ -58,7 +54,7 @@ void Map::setHeight(int height) {
 void Map::draw(WINDOW* win) {
     for (int i=0; i<height; i++) {
         for (int j=0; j<width; j++) {
-            switch (map[i][j]) {
+            switch (getObject(i, j)) {
                 case 0:
                     mvwprintw(win, i, j, " ");
                     break;
@@ -88,7 +84,6 @@ void Map::draw(WINDOW* win) {
 void Map::makeGate() {
     //immune wall 제외한 곳에 gate를 하나만 생성
     int y, x;
-    srand(time(NULL));
     x = rand() % (width-2) + 1;
     y = rand() % (height-2) + 1;
 
@@ -102,9 +97,8 @@ void Map::makeGate() {
 void Map::makeItem() {
     //빈 공간에 item을 하나만 생성
     int y, x;
-    srand(time(NULL));
-    x = rand() % (width-2) + 1;
-    y = rand() % (height-2) + 1;
+    x = (rand() % (width-2)) + 1;
+    y = (rand() % (height-2)) + 1;
 
     if(map[y][x] == 0) {
         map[y][x] = 4;
@@ -116,7 +110,6 @@ void Map::makeItem() {
 void Map::makePoison() {
     //빈 공간에 poison을 하나만 생성
     int y, x;
-    srand(time(NULL));
     x = rand() % (width-2) + 1;
     y = rand() % (height-2) + 1;
 
@@ -161,4 +154,8 @@ int Map::getObject(int y, int x) {
 pair<int, int> Map::getPoint(int y, int x) {
     pair<int, int> tmp = make_pair(y, x);
     return tmp;
+}
+
+void Map::setObject(int y, int x, int point) {
+    map[y][x] = point;
 }

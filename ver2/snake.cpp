@@ -50,15 +50,7 @@ void Snake::move() {
 void Snake::grow() {
     int y = body.front().first;
     int x = body.front().second;
-    if (dir == UP) {
-        body.push_front(make_pair(y - 1, x));
-    } else if (dir == DOWN) {
-        body.push_front(make_pair(y + 1, x));
-    } else if (dir == LEFT) {
-        body.push_front(make_pair(y, x - 1));
-    } else if (dir == RIGHT) {
-        body.push_front(make_pair(y, x + 1));
-    }
+    body.push_back(make_pair(y, x));
 }
 
 void Snake::degrow() {
@@ -81,9 +73,13 @@ void Snake::interact(int y, int x, int point, Map map) {
                     break;
                 case 4:
                     grow();
+                    map.setObject(y, x, 0);
+                    map.makeItem();
                     break;
                 case 5:
                     degrow();
+                    map.setObject(y, x, 0);
+                    map.makePoison();
                     break;
             }
     }

@@ -9,8 +9,9 @@
 #include "direction.h"
 
 
-int main(int argc, char const *argv[])
+int main(int argc, char const *argv[]) 
 {
+    srand(time(0));
     initscr();
     noecho();
     curs_set(0);
@@ -24,6 +25,7 @@ int main(int argc, char const *argv[])
         WINDOW* game_win = newwin(height, width, 0, 0);
         nodelay(game_win, TRUE);
         wtimeout(game_win, 1000);
+        keypad(game_win, TRUE); // 특수 키를 사용 가능하게 함
 
         wclear(game_win);
         wrefresh(game_win);
@@ -43,7 +45,7 @@ int main(int argc, char const *argv[])
         while(true) {
             map.draw(game_win);
             snake.draw(game_win);
-            
+
             int ch = wgetch(game_win);
             switch(ch) {
                 case KEY_UP:

@@ -1,9 +1,8 @@
 #pragma once
 #include <iostream>
 #include <ncurses.h>
-#include <cstdlib>
-#include <ctime>
-#include <unistd.h>
+#include <cstdlib> //rand()
+#include <ctime> //time()
 
 using namespace std;
 
@@ -11,12 +10,12 @@ class Map {
 private:
     int width;
     int height;
-    int **map;
+    vector< vector<int> > map;
 
 public:
     Map(int width, int height);
-    ~Map();
     
+    void setObject(int y, int x, int point);
     void setWall(int y, int x);
     void setImmuneWall(int y, int x);
     void setGate(int y, int x);
