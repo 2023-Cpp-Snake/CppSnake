@@ -3,6 +3,7 @@
 #include <ncurses.h>
 #include <cstdlib> //rand()
 #include <ctime> //time()
+#include <vector>
 
 using namespace std;
 
