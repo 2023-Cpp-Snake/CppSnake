@@ -73,7 +73,7 @@ void Map::draw(WINDOW* win) {
                     mvwprintw(win, i, j, "X");
                     wattroff(win, COLOR_PAIR(3));
                     break;
-                case 3: //orange color
+                case 3: 
                     init_pair(4, COLOR_CYAN, COLOR_BLUE);
                     wattron(win, COLOR_PAIR(4));
                     mvwprintw(win, i, j, "G");
