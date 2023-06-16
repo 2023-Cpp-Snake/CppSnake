@@ -56,22 +56,40 @@ void Map::draw(WINDOW* win) {
         for (int j=0; j<width; j++) {
             switch (getObject(i, j)) {
                 case 0:
+                    init_pair(1, COLOR_WHITE, COLOR_WHITE);
+                    wattron(win, COLOR_PAIR(1));
                     mvwprintw(win, i, j, " ");
+                    wattroff(win, COLOR_PAIR(1));
                     break;
                 case 1:
+                    init_pair(2, COLOR_BLACK, COLOR_BLACK);
+                    wattron(win, COLOR_PAIR(2));
                     mvwprintw(win, i, j, "#");
+                    wattroff(win, COLOR_PAIR(2));
                     break;
                 case 2:
+                    init_pair(3, COLOR_BLUE, COLOR_BLUE);
+                    wattron(win, COLOR_PAIR(3));
                     mvwprintw(win, i, j, "X");
+                    wattroff(win, COLOR_PAIR(3));
                     break;
-                case 3:
+                case 3: //orange color
+                    init_pair(4, COLOR_CYAN, COLOR_BLUE);
+                    wattron(win, COLOR_PAIR(4));
                     mvwprintw(win, i, j, "G");
+                    wattroff(win, COLOR_PAIR(4));
                     break;
                 case 4:
+                    init_pair(5, COLOR_WHITE, COLOR_GREEN);
+                    wattron(win, COLOR_PAIR(5));
                     mvwprintw(win, i, j, "I");
+                    wattroff(win, COLOR_PAIR(5));
                     break;
                 case 5:
+                    init_pair(6, COLOR_BLACK, COLOR_RED);
+                    wattron(win, COLOR_PAIR(6));
                     mvwprintw(win, i, j, "P");
+                    wattroff(win, COLOR_PAIR(6));
                     break;
                 case 6:
                     mvwprintw(win, i, j, "S");

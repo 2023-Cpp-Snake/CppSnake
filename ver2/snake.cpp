@@ -3,9 +3,9 @@
 Snake::Snake(int height, int width, Direction dir) {
     this->dir = dir;
     //add three body
-    body.push_back(make_pair(height/2, (width/2)));
-    body.push_back(make_pair(height/2, (width/2) - 1));
-    body.push_back(make_pair(height/2, (width/2) - 2));
+    body.push_back(make_pair(2, 4));
+    body.push_back(make_pair(2, 3));
+    body.push_back(make_pair(2, 2));
     isDead = false;
 }
 
@@ -14,8 +14,12 @@ void Snake::setDir(Direction dir) {
 }
 
 void Snake::draw(WINDOW* win) {
+    init_pair(7, COLOR_GREEN, COLOR_GREEN);
+    init_pair(8, COLOR_WHITE, COLOR_GREEN);
+    
     for (auto p : body) {
         if (p == body.front()) {
+            wattron(win, COLOR_PAIR(8));
             if (dir == UP) {
                     mvwprintw(win, p.first, p.second, "^");
                 } else if (dir == DOWN) {
@@ -25,14 +29,18 @@ void Snake::draw(WINDOW* win) {
                 } else if (dir == RIGHT) {
                     mvwprintw(win, p.first, p.second, ">");
                 }
+                wattroff(win, COLOR_PAIR(8));
             } else {
+                wattron(win, COLOR_PAIR(7));
                 mvwprintw(win, p.first, p.second, "o");
+                wattroff(win, COLOR_PAIR(7));
             }
         }
+    
 }
 
 
-void Snake::move() {
+void Snake::move(Map& map) {
     int y = body.front().first;
     int x = body.front().second;
     if (dir == UP) {
@@ -44,7 +52,9 @@ void Snake::move() {
     } else if (dir == RIGHT) {
         body.push_front(make_pair(y, x + 1));
     }
+    auto a = body.back();
     body.pop_back();
+    map.setObject(a.first, a.second, 0);
 }
 
 void Snake::grow() {
@@ -53,11 +63,13 @@ void Snake::grow() {
     body.push_back(make_pair(y, x));
 }
 
-void Snake::degrow() {
+void Snake::degrow(Map& map) {
+    auto a = body.back();
     body.pop_back();
     if(body.size() < 3) {
         isDead = true;
     }
+    map.setObject(a.first, a.second, 0);
 }
 
 void Snake::interact(int y, int x, int point, Map& map, Score& score) {
@@ -82,14 +94,26 @@ void Snake::interact(int y, int x, int point, Map& map, Score& score) {
                     score.setCurrentGrowth(score.getCurrentGrowth() + 1);
                     break;
                 case 5:
-                    degrow();
+                    degrow(map);
                     map.setObject(y, x, 0);
                     map.makePoison();
                     score.setCurrentPoison(score.getCurrentPoison() + 1);
                     break;
+                case 6:
+                    isDead = true;
+                    break;
+
             }
     }
 }
+    // not head, only body set '6' on mapdata
+void Snake::makeSnake(Map& map) {
+    for (auto p : body) {
+        if(p != body.front()) map.setObject(p.first, p.second, 6);
+    }
+}
+    
+
 
 void Snake::gate(int y, int x, Map map) { 
     // find out gate, x,y is enter gate

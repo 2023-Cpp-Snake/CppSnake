@@ -97,6 +97,8 @@ void Score::setMaxStage(int maxStage) {
 
 void Score::draw(WINDOW* win) {
     box(win, 0, 0);
+    init_pair(10, COLOR_WHITE, COLOR_BLACK);
+    wattron(win, COLOR_PAIR(10));
     mvwprintw(win, 1, 1, "Score Board");
     mvwprintw(win, 2, 1, "Timer: %d", timer);
     mvwprintw(win, 3, 1, "Stage: %d", currentStage);
@@ -110,6 +112,7 @@ void Score::draw(WINDOW* win) {
     mvwprintw(win, 10, 1, "+: %d (%s)", maxGrowth, currentGrowth>=maxGrowth?"V":" ");
     mvwprintw(win, 11, 1, "-: %d (%s)", maxPoison, currentPoison>=maxPoison?"V":" ");
     mvwprintw(win, 12, 1, "G: %d (%s)", maxGate, currentGate>=maxGate?"V":" ");
+    wattroff(win, COLOR_PAIR(10));
 }
 
 bool Score::checkAllMax() {

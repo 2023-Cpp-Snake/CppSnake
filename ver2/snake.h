@@ -1,3 +1,4 @@
+#pragma once
 #include <deque>
 #include <ncurses.h>
 #include "score.h"
@@ -21,10 +22,13 @@ public:
     bool getIsDead();
     pair<int, int> getHead();
 
-    void move();
+    void makeSnake(Map& map) ;
+
+    void move(Map& map);
     void gate(int y, int x, Map map);
     void grow();
-    void degrow();
+    void degrow(Map &map);
+    int getLength();
 
     void interact(int y, int x, int point, Map& map, Score& score);
 

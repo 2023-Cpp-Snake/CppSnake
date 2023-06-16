@@ -13,6 +13,7 @@ int main(int argc, char const *argv[])
 {
     srand(time(0));
     initscr();
+    start_color();
     noecho();
     curs_set(0);
     refresh();
@@ -21,9 +22,9 @@ int main(int argc, char const *argv[])
         //first stage
         //initialize map
         int height, width;
-        height = 21;
-        width = 21;
-        Score score(0, 0, 0, 1, 1);
+        height = 22;
+        width = 22;
+        Score score(5, 3, 1, 1, 4);
         Map map(height, width);
         Snake snake(height, width, RIGHT);
         WINDOW* game_win = newwin(height, width, 0, 0);
@@ -38,25 +39,76 @@ int main(int argc, char const *argv[])
             wclear(score_win);
         } else if (stage == 2) {
             score.clear();
-            score.set(0, 0, 0, 2, maxStage);
+            score.set(7, 5, 3, 3, maxStage);
             score.setCurrentStage(stage);
-            wtimeout(game_win, 1000);
+            wtimeout(game_win, 800);
             wclear(game_win);
             wclear(score_win);
+            map.setWall(height/2, width/2);
+            map.setWall(height/2, width/2+1);
+            map.setWall(height/2, width/2+2);
+            map.setWall(height/2, width/2+3);
+            map.setWall(height/2, width/2-1);
+            map.setWall(height/2, width/2-2);
+            map.setWall(height/2, width/2-3);
+            map.setWall(height/2, width/2+4);
+            map.setWall(height/2, width/2-4);
         } else if (stage == 3) {
             score.clear();
-            score.set(0, 0, 0, 3, maxStage);
+            score.set(10, 10, 5, 4, maxStage);
             score.setCurrentStage(stage);
-            wtimeout(game_win, 1000);
+            wtimeout(game_win, 600);
             wclear(game_win);
             wclear(score_win);
+
+
+            map.setWall(height/2-2, width/2);
+            map.setWall(height/2-1, width/2);
+            map.setWall(height/2, width/2);
+            map.setWall(height/2+1, width/2);
+            map.setWall(height/2+2, width/2);
+            map.setWall(height/2+3, width/2);
+            map.setWall(height/2+3, width/2+1);
+            map.setWall(height/2+3, width/2+2);
+            map.setWall(height/2+3, width/2+3);
+            map.setWall(height/2+3, width/2+4);
+            map.setWall(height/2+3, width/2+5);
+            map.setWall(height/2+3, width/2+6);
+            map.setWall(height/2+3, width/2+7);
         } else if (stage == 4) {
             score.clear();
-            score.set(0, 0, 0, 4, maxStage);
+            score.set(13, 11, 7, 5, maxStage);
             score.setCurrentStage(stage);
-            wtimeout(game_win, 1000);
+            wtimeout(game_win, 400);
             wclear(game_win);
             wclear(score_win);
+
+
+            map.setWall(height/2, width/2);
+            map.setWall(height/2, width/2-1);
+            map.setWall(height/2, width/2-2);
+            map.setWall(height/2, width/2-3);
+            map.setWall(height/2, width/2-4);
+            map.setWall(height/2, width/2+1);
+            map.setWall(height/2, width/2+2);
+            map.setWall(height/2, width/2+3);
+            map.setWall(height/2, width/2+4);
+            map.setWall(height/2+1, width/2);
+            map.setWall(height/2+2, width/2);
+            map.setWall(height/2+3, width/2);
+            map.setWall(height/2+4, width/2);
+            map.setWall(height/2-1, width/2);
+            map.setWall(height/2-2, width/2);
+            map.setWall(height/2-3, width/2);
+            map.setWall(height/2-4, width/2);
+            map.setWall(height/2+1, width/2+1);
+            map.setWall(height/2+2, width/2+2);
+            map.setWall(height/2+3, width/2+3);
+            map.setWall(height/2+4, width/2+4);
+            map.setWall(height/2-1, width/2-1);
+            map.setWall(height/2-2, width/2-2);
+            map.setWall(height/2-3, width/2-3);
+            map.setWall(height/2-4, width/2-4);
         }
         
    
@@ -102,13 +154,16 @@ int main(int argc, char const *argv[])
                     endwin();
                     return 0;
             }
-            snake.move();
+            snake.move(map);
             //interact with snake's head
             int y, x;
             y = snake.getHead().first;
             x = snake.getHead().second;
             int point = map.getObject(y, x);
+            snake.makeSnake(map);
             snake.interact(y, x, point, map, score);
+
+            score.setCurrentLength(snake.getsize());
             
             wrefresh(game_win);
             wrefresh(score_win);
@@ -128,7 +183,10 @@ int main(int argc, char const *argv[])
             //game over
             wclear(game_win);
             box(game_win, 0, 0);
+            init_pair(8, COLOR_RED, COLOR_BLACK);
+            wattron(game_win, COLOR_PAIR(8));
             mvwprintw(game_win, height/2, width/2-4, "Game Over");
+            wattroff(game_win, COLOR_PAIR(8));
             wrefresh(game_win);
             sleep(1);
             getch();
@@ -140,7 +198,10 @@ int main(int argc, char const *argv[])
             //game over
             wclear(game_win);
             box(game_win, 0, 0);
+            init_pair(9, COLOR_WHITE, COLOR_BLACK);
+            wattron(game_win, COLOR_PAIR(9));
             mvwprintw(game_win, height/2, width/2-5, "Game Clear");
+            wattroff(game_win, COLOR_PAIR(9));
             wrefresh(game_win);
             sleep(1);
             getch();
@@ -150,6 +211,6 @@ int main(int argc, char const *argv[])
 
         score.clear();
     }
-    //game over
+
     return 0;
 }
