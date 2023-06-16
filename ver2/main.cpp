@@ -1,8 +1,8 @@
-#include <iostream>
-#include <ncurses.h>
-#include <cstdlib>
-#include <ctime>
-#include <unistd.h>
+#include <iostream> //cout
+#include <ncurses.h> //WINDOW
+#include <cstdlib> //rand()
+#include <ctime> //time()
+#include <unistd.h> //usleep()
 #include "score.h"
 #include "map.h"
 #include "snake.h"
